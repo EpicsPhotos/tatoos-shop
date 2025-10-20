@@ -1,88 +1,418 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Galerie privée</title>
+  <title>Tattoos — Sélecteur avec miniatures + Favori auto</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: white;
-      text-align: center;
+    :root{
+      --bg-deep:#0a0012;
+      --bg2:#120018;
+      --glow1:#3a174f;
+      --glow2:#2c0d3a;
+      --text:#f5eaff;
+      --muted:#cdb7d9;
+      --accent:#b466ff;
+      --accent-2:#ff6ccf;
+      --outline:rgba(255,255,255,.12);
+      --radius:16px;
+      --shadow:0 20px 60px rgba(0,0,0,.55);
     }
-    h1 {
-      padding: 20px;
-      font-size: 2em;
-      color: #FF69b4;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 10% -10%, var(--glow1) 0%, transparent 60%),
+        radial-gradient(700px 400px at 100% 0%, var(--glow2) 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg-deep), var(--bg2));
+      letter-spacing:.2px;
     }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      padding: 10px 20px;
+    .page{ max-width:1200px; margin:0 auto; padding: 22px 16px 40px; }
+    h1{ margin:0 0 6px; font-size: clamp(1.8rem, 4vw, 2.4rem); color: var(--accent-2); text-shadow: 0 10px 28px rgba(0,0,0,.45); }
+    p.subtitle{ margin:0 0 20px; color:var(--muted); font-weight:600; }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--outline);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 18px;
     }
-    .gallery img, .gallery video {
-      width: 100%;
-      border-radius: 10px;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
+    .vote-row{ display:grid; grid-template-columns: 1fr; gap: 14px; align-items:start; }
+    @media (min-width: 980px){ .vote-row{ grid-template-columns: 1.05fr .95fr; } }
+
+    label{ font-weight:900; display:block; margin-bottom:8px; }
+
+    .native-select{ display:none; }
+    .native-select select{ width:100%; max-width:560px; padding:12px; border-radius:12px; border:1px solid var(--outline); background:#160820; color:var(--text); font-weight:700; }
+
+    .thumb-select{ position:relative; max-width: 560px; }
+    .thumb-toggle{
+      width:100%; display:flex; align-items:center; gap:10px; justify-content:space-between;
+      padding:10px; border-radius:12px; border:1px solid var(--outline); background:#160820; color:var(--text); font-weight:800; cursor:pointer;
     }
-    video {
-      max-height: 300px;
+    .thumb-toggle .current{ display:flex; align-items:center; gap:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .thumb-toggle .current img{ width:32px; height:32px; border-radius:8px; object-fit:cover; }
+    .thumb-list{
+      position:absolute; z-index:30; top: calc(100% + 6px); left:0; right:0;
+      background:#120018; border:1px solid var(--outline); border-radius:12px; box-shadow: var(--shadow);
+      max-height: 360px; overflow:auto; padding:6px; display:none;
+    }
+    .thumb-list.open{ display:block; }
+    .thumb-option{
+      display:flex; align-items:center; gap:10px; padding:8px; border-radius:10px; cursor:pointer;
+    }
+    .thumb-option:hover, .thumb-option[aria-selected="true"]{ background: rgba(255,255,255,.08); }
+    .thumb{ width:44px; height:44px; border-radius:10px; object-fit:cover; display:block; }
+    .thumb-label{ font-weight:800; }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-start; margin-top:12px; }
+    .btn{
+      border:none; border-radius: 9999px; padding:12px 16px; font-weight:900; cursor:pointer;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b0e1b;
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    }
+    .btn.secondary{ background: transparent; color: var(--text); border:1px solid var(--outline); }
+    .status{ color:var(--muted); font-weight:800; min-height:1.2em; margin-top:6px; }
+
+    .preview{ 
+      display:grid; place-items:center; border:1px dashed var(--outline); border-radius:12px; padding:10px; min-height: 320px; background: rgba(255,255,255,.03);
+    }
+    .preview img{ max-width:100%; height:auto; display:block; border-radius:12px; }
+
+    .favorite-preview{ margin-top:12px; display:none; }
+    .favorite-preview .fav-box{
+      display:flex; align-items:center; gap:10px; border:1px solid var(--outline); border-radius:12px; padding:8px; background: rgba(255,255,255,.04);
+    }
+    .favorite-preview img{ width:64px; height:64px; border-radius:10px; object-fit:cover; }
+    .favorite-preview .fav-title{ font-weight:900; color:var(--muted); }
+
+    .grid{ 
+      display:grid; 
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+      gap: 14px; 
+    }
+    .g-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--outline);
+      border-radius: 14px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .g-img{
+      width:100%; display:block; aspect-ratio: 1/1; object-fit: cover;
+      transition: transform .22s ease, filter .22s ease;
+    }
+    .g-cap{
+      padding:8px 10px; border-top:1px solid var(--outline);
+      font-weight:800; text-align:center; color:var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    @media (hover:hover){
+      .g-card:hover .g-img{ transform: scale(1.04); filter:saturate(1.04); }
+    }
+
+    .toast{
+      position: fixed; left:50%; transform: translateX(-50%);
+      bottom: 16px; background: rgba(255,255,255,.1); color: var(--text);
+      border:1px solid var(--outline); border-radius: 9999px; padding:10px 14px; font-weight:900; display:none;
+      backdrop-filter: blur(6px);
     }
   </style>
-  <script>
-    document.addEventListener('contextmenu', event => event.preventDefault());
-    document.addEventListener('dragstart', event => event.preventDefault());
-    document.addEventListener('selectstart', event => event.preventDefault());
-  </script>
-
-<style>
-  .gallery img:hover {
-    transform: scale(1.8);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-    position: relative;
-  }
-</style>
-
 </head>
 <body>
-  <button onclick="window.close()" style="position: fixed; top: 10px; right: 10px; background: #FF69B4; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-size: 14px; cursor: pointer; z-index: 9999;">Fermer</button>
-  <!-- Bouton d'accès à la page MYM. Il reste visible même lors du défilement (position : fixed) -->
+  <div class="page">
+    <h1>Votez pour votre tatouage préféré et obtenez un rabais sur votre prochain tatoo!</h1>
+    <p class="subtitle">________________________________________________</p>
 
+    <div class="card">
+      <div class="vote-row">
+        <div>
+          <div class="thumb-select" id="thumbSelect" aria-haspopup="listbox">
+            <button type="button" class="thumb-toggle" id="thumbToggle" aria-expanded="false" aria-controls="thumbList">
+              <div class="current"><img src="image1.jpg" alt=""/><span id="thumbCurrent">image 1</span></div>
+              <span>▾</span>
+            </button>
+            <ul class="thumb-list" id="thumbList" role="listbox">
+              <li class="thumb-option" data-src="image1.jpg" role="option" tabindex="-1">
+          <img src="image1.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 1</span>
+        </li>
+<li class="thumb-option" data-src="image2.jpg" role="option" tabindex="-1">
+          <img src="image2.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 2</span>
+        </li>
+<li class="thumb-option" data-src="image3.jpg" role="option" tabindex="-1">
+          <img src="image3.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 3</span>
+        </li>
+<li class="thumb-option" data-src="image4.jpg" role="option" tabindex="-1">
+          <img src="image4.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 4</span>
+        </li>
+<li class="thumb-option" data-src="image5.jpg" role="option" tabindex="-1">
+          <img src="image5.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 5</span>
+        </li>
+<li class="thumb-option" data-src="image6.jpg" role="option" tabindex="-1">
+          <img src="image6.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 6</span>
+        </li>
+<li class="thumb-option" data-src="image7.jpg" role="option" tabindex="-1">
+          <img src="image7.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 7</span>
+        </li>
+<li class="thumb-option" data-src="image8.jpg" role="option" tabindex="-1">
+          <img src="image8.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 8</span>
+        </li>
+<li class="thumb-option" data-src="image9.jpg" role="option" tabindex="-1">
+          <img src="image9.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 9</span>
+        </li>
+<li class="thumb-option" data-src="image10.jpg" role="option" tabindex="-1">
+          <img src="image10.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 10</span>
+        </li>
+<li class="thumb-option" data-src="image11.jpg" role="option" tabindex="-1">
+          <img src="image11.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 11</span>
+        </li>
+<li class="thumb-option" data-src="image12.jpg" role="option" tabindex="-1">
+          <img src="image12.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 12</span>
+        </li>
+<li class="thumb-option" data-src="image13.jpg" role="option" tabindex="-1">
+          <img src="image13.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 13</span>
+        </li>
+<li class="thumb-option" data-src="image14.jpg" role="option" tabindex="-1">
+          <img src="image14.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 14</span>
+        </li>
+<li class="thumb-option" data-src="image15.jpg" role="option" tabindex="-1">
+          <img src="image15.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 15</span>
+        </li>
+<li class="thumb-option" data-src="image16.jpg" role="option" tabindex="-1">
+          <img src="image16.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 16</span>
+        </li>
+<li class="thumb-option" data-src="image17.jpg" role="option" tabindex="-1">
+          <img src="image17.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 17</span>
+        </li>
+<li class="thumb-option" data-src="image18.jpg" role="option" tabindex="-1">
+          <img src="image18.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 18</span>
+        </li>
+<li class="thumb-option" data-src="image19.jpg" role="option" tabindex="-1">
+          <img src="image19.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 19</span>
+        </li>
+<li class="thumb-option" data-src="image20.jpg" role="option" tabindex="-1">
+          <img src="image20.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 20</span>
+        </li>
+<li class="thumb-option" data-src="image21.jpg" role="option" tabindex="-1">
+          <img src="image21.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 21</span>
+        </li>
+<li class="thumb-option" data-src="image22.jpg" role="option" tabindex="-1">
+          <img src="image22.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 22</span>
+        </li>
+<li class="thumb-option" data-src="image23.jpg" role="option" tabindex="-1">
+          <img src="image23.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 23</span>
+        </li>
+<li class="thumb-option" data-src="image24.jpg" role="option" tabindex="-1">
+          <img src="image24.jpg" alt="" class="thumb"/>
+          <span class="thumb-label">image 24</span>
+        </li>
+            </ul>
+          </div>
 
-  <h1>Tatoos Shop</h1>
-  <div class="gallery">
-    <img src="image1.jpg" alt="image 1" />
-<img src="image2.jpg" alt="image 2" />
-<img src="image3.jpg" alt="image 3" />
-<img src="image4.jpg" alt="image 4" />
-<img src="image5.jpg" alt="image 5" />
-<img src="image6.jpg" alt="image 6" />
-<img src="image7.jpg" alt="image 7" />
-<img src="image8.jpg" alt="image 8" />
-<img src="image9.jpg" alt="image 9" />
-<img src="image10.jpg" alt="image 10" />
-<img src="image11.jpg" alt="image 11" />
-<img src="image12.jpg" alt="image 12" />
-<img src="image13.jpg" alt="image 13" />
-<img src="image14.jpg" alt="image 14" />
-<img src="image15.jpg" alt="image 15" />
-<img src="image16.jpg" alt="image 16" />
-<img src="image17.jpg" alt="image 17" />
-<img src="image18.jpg" alt="image 18" />
-<img src="image19.jpg" alt="image 19" />
-<img src="image20.jpg" alt="image 20" />
-<img src="image21.jpg" alt="image 21" />
-<img src="image22.jpg" alt="image 22" />
-<img src="image23.jpg" alt="image 23" />
-<img src="image24.jpg" alt="image 24" />
+          <div class="native-select" aria-hidden="true">
+            <label for="selectImg">Image à voter (fallback)</label>
+            <select id="selectImg">
+              <option value="image1.jpg">image 1</option>
+<option value="image2.jpg">image 2</option>
+<option value="image3.jpg">image 3</option>
+<option value="image4.jpg">image 4</option>
+<option value="image5.jpg">image 5</option>
+<option value="image6.jpg">image 6</option>
+<option value="image7.jpg">image 7</option>
+<option value="image8.jpg">image 8</option>
+<option value="image9.jpg">image 9</option>
+<option value="image10.jpg">image 10</option>
+<option value="image11.jpg">image 11</option>
+<option value="image12.jpg">image 12</option>
+<option value="image13.jpg">image 13</option>
+<option value="image14.jpg">image 14</option>
+<option value="image15.jpg">image 15</option>
+<option value="image16.jpg">image 16</option>
+<option value="image17.jpg">image 17</option>
+<option value="image18.jpg">image 18</option>
+<option value="image19.jpg">image 19</option>
+<option value="image20.jpg">image 20</option>
+<option value="image21.jpg">image 21</option>
+<option value="image22.jpg">image 22</option>
+<option value="image23.jpg">image 23</option>
+<option value="image24.jpg">image 24</option>
+            </select>
+          </div>
 
+          <div class="actions">
+            <button class="btn" id="sendBtn">❤️ Envoyer le vote</button>
+            <button class="btn secondary" id="favBtn">⭐ Définir comme favori (local)</button>
+          </div>
+          <div class="status" id="status"></div>
+
+          <div class="favorite-preview" id="favPreview">
+            <div class="fav-box">
+              <img id="favImg" src="" alt="Favori"/>
+              <div>
+                <div class="fav-title">Votre favori</div>
+                <div id="favSrc" style="word-break: break-all;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview" id="preview">
+          <img src="image1.jpg" alt="Prévisualisation"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Galerie 24 images avec noms -->
+    <div class="grid">
+      <figure class="g-card"><img src="image1.jpg" alt="image 1" class="g-img"/><figcaption class="g-cap">image1</figcaption></figure><figure class="g-card"><img src="image2.jpg" alt="image 2" class="g-img"/><figcaption class="g-cap">image2</figcaption></figure><figure class="g-card"><img src="image3.jpg" alt="image 3" class="g-img"/><figcaption class="g-cap">image3</figcaption></figure><figure class="g-card"><img src="image4.jpg" alt="image 4" class="g-img"/><figcaption class="g-cap">image4</figcaption></figure><figure class="g-card"><img src="image5.jpg" alt="image 5" class="g-img"/><figcaption class="g-cap">image5</figcaption></figure><figure class="g-card"><img src="image6.jpg" alt="image 6" class="g-img"/><figcaption class="g-cap">image6</figcaption></figure><figure class="g-card"><img src="image7.jpg" alt="image 7" class="g-img"/><figcaption class="g-cap">image7</figcaption></figure><figure class="g-card"><img src="image8.jpg" alt="image 8" class="g-img"/><figcaption class="g-cap">image8</figcaption></figure><figure class="g-card"><img src="image9.jpg" alt="image 9" class="g-img"/><figcaption class="g-cap">image9</figcaption></figure><figure class="g-card"><img src="image10.jpg" alt="image 10" class="g-img"/><figcaption class="g-cap">image10</figcaption></figure><figure class="g-card"><img src="image11.jpg" alt="image 11" class="g-img"/><figcaption class="g-cap">image11</figcaption></figure><figure class="g-card"><img src="image12.jpg" alt="image 12" class="g-img"/><figcaption class="g-cap">image12</figcaption></figure><figure class="g-card"><img src="image13.jpg" alt="image 13" class="g-img"/><figcaption class="g-cap">image13</figcaption></figure><figure class="g-card"><img src="image14.jpg" alt="image 14" class="g-img"/><figcaption class="g-cap">image14</figcaption></figure><figure class="g-card"><img src="image15.jpg" alt="image 15" class="g-img"/><figcaption class="g-cap">image15</figcaption></figure><figure class="g-card"><img src="image16.jpg" alt="image 16" class="g-img"/><figcaption class="g-cap">image16</figcaption></figure><figure class="g-card"><img src="image17.jpg" alt="image 17" class="g-img"/><figcaption class="g-cap">image17</figcaption></figure><figure class="g-card"><img src="image18.jpg" alt="image 18" class="g-img"/><figcaption class="g-cap">image18</figcaption></figure><figure class="g-card"><img src="image19.jpg" alt="image 19" class="g-img"/><figcaption class="g-cap">image19</figcaption></figure><figure class="g-card"><img src="image20.jpg" alt="image 20" class="g-img"/><figcaption class="g-cap">image20</figcaption></figure><figure class="g-card"><img src="image21.jpg" alt="image 21" class="g-img"/><figcaption class="g-cap">image21</figcaption></figure><figure class="g-card"><img src="image22.jpg" alt="image 22" class="g-img"/><figcaption class="g-cap">image22</figcaption></figure><figure class="g-card"><img src="image23.jpg" alt="image 23" class="g-img"/><figcaption class="g-cap">image23</figcaption></figure><figure class="g-card"><img src="image24.jpg" alt="image 24" class="g-img"/><figcaption class="g-cap">image24</figcaption></figure>
+    </div>
   </div>
+
+  <div class="toast" id="toast">Vote envoyé!</div>
+
+  <script>
+    (function() {
+      const thumbToggle = document.getElementById('thumbToggle');
+      const thumbList = document.getElementById('thumbList');
+      const thumbCurrent = document.getElementById('thumbCurrent');
+      const nativeSelect = document.getElementById('selectImg');
+      const prev = document.getElementById('preview');
+      const status = document.getElementById('status');
+      const toast = document.getElementById('toast');
+      const sendBtn = document.getElementById('sendBtn');
+      const favBtn = document.getElementById('favBtn');
+
+      const favPreview = document.getElementById('favPreview');
+      const favImg = document.getElementById('favImg');
+      const favSrc = document.getElementById('favSrc');
+
+      const KEY_FAV = 'tattooFavorite';
+      const KEY_COUNTS = 'tattooVoteCounts';
+
+      function showStatus(msg) { status.textContent = msg || ''; }
+      function showToast(msg) {
+        toast.textContent = msg || 'OK';
+        toast.style.display = 'inline-block';
+        setTimeout(() => toast.style.display = 'none', 1600);
+      }
+
+      function getFavorite() { return localStorage.getItem(KEY_FAV) || null; }
+      function setFavorite(src) { localStorage.setItem(KEY_FAV, src); }
+
+      function readCounts() { try { return JSON.parse(localStorage.getItem(KEY_COUNTS) || '{}'); } catch(e) { return {}; } }
+      function writeCounts(obj) { localStorage.setItem(KEY_COUNTS, JSON.stringify(obj || {})); }
+
+      function showPreview(src) {
+        prev.innerHTML = '';
+        if (!src) { prev.innerHTML = '<span>Aucune image</span>'; return; }
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Prévisualisation';
+        img.loading = 'lazy';
+        prev.appendChild(img);
+      }
+
+      function refreshFavoritePreview() {
+        const fav = getFavorite();
+        if (!fav) { favPreview.style.display = 'none'; return; }
+        favPreview.style.display = 'block';
+        favImg.src = fav;
+        favSrc.textContent = fav;
+      }
+
+      thumbToggle.addEventListener('click', () => {
+        const open = thumbList.classList.toggle('open');
+        thumbToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!thumbList.classList.contains('open')) return;
+        if (!e.target.closest('.thumb-select')) {
+          thumbList.classList.remove('open');
+          thumbToggle.setAttribute('aria-expanded','false');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && thumbList.classList.contains('open')) {
+          thumbList.classList.remove('open');
+          thumbToggle.setAttribute('aria-expanded','false');
+        }
+      });
+
+      thumbList.addEventListener('click', (e) => {
+        const li = e.target.closest('.thumb-option');
+        if (!li) return;
+        const src = li.getAttribute('data-src');
+        const label = li.querySelector('.thumb-label')?.textContent || '—';
+        const img = thumbToggle.querySelector('img');
+        img.src = src;
+        thumbCurrent.textContent = label;
+        if (nativeSelect) nativeSelect.value = src;
+        showPreview(src);
+        thumbList.classList.remove('open');
+        thumbToggle.setAttribute('aria-expanded','false');
+      });
+
+      sendBtn.addEventListener('click', () => {
+        const src = nativeSelect ? nativeSelect.value : null;
+        if (!src) { showStatus('Veuillez choisir une image.'); return; }
+        showStatus('Envoi en cours…');
+        sendBtn.disabled = true;
+        setTimeout(() => {
+          const counts = readCounts();
+          counts[src] = (counts[src] || 0) + 1;
+          writeCounts(counts);
+
+          // NEW: define favorite automatically on vote
+          setFavorite(src);
+          refreshFavoritePreview();
+
+          showStatus('Vote envoyé pour : ' + src + ' — favori mis à jour');
+          showToast('Vote envoyé ✅ Favori mis à jour ⭐');
+          sendBtn.disabled = false;
+        }, 900);
+      });
+
+      favBtn.addEventListener('click', () => {
+        const src = nativeSelect ? nativeSelect.value : null;
+        if (!src) { showStatus('Veuillez choisir une image.'); return; }
+        setFavorite(src);
+        showStatus('Favori mis à jour : ' + src);
+        showToast('Favori enregistré ⭐');
+        refreshFavoritePreview();
+      });
+
+      // Init
+      if (nativeSelect && nativeSelect.value) showPreview(nativeSelect.value);
+      refreshFavoritePreview();
+    })();
+  </script>
 </body>
 </html>
